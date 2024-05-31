@@ -3,15 +3,15 @@
 const int PI = 3.141592653589793;
 
 int main(void) {
-  double modu, ang;
-  double rad, ParteA, ParteB;
+  double Modu, Ang;
+  double Rad, ParteA, ParteB;
   printf("Inserte modulo:");
-  scanf("%lf", &modu);
+  scanf("%lf", &Modu);
   printf("Inserte angulo:");
-  scanf("%lf", &ang);
-  rad = ang * (PI / 180.0);
-  ParteA = modu * cos(rad);
-  ParteB = modu * sin(rad);
+  scanf("%lf", &Ang);
+  Rad = Ang * (PI / 180.0);
+  ParteA = Modu * cos(Rad);
+  ParteB = Modu * sin(Rad);
   printf("La forma binomica es: %f + %f i", ParteA, ParteB);
   return 0;
 }
