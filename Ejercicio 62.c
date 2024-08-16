@@ -18,7 +18,7 @@ void EsPrimo (int Num){
   for (int i=2; i <= Num/2; i++) {
     if (Num % i == 0) {
       printf("El numero %d NO es primo\n", Num);
-      return;
+      return
     }
   }
   printf("El numero %d es primo\n", Num);
