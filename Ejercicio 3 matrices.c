@@ -1,25 +1,27 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#define N 5
+#define N 10
 #define MAX 100
 
 void Generar(int matriz[N][N]);
-void EsPrimo(int matriz[N][N]);
+int Primo(int);
+void EsPrimo(int matriz[N][N], int vector[N*N]);
 
 int main()
 {
-    int matriz[N][N];
+    int matriz[N][N], vector[N*N]={0};
     Generar(matriz);
-    EsPrimo(matriz);
-    printf("Hello World");
-
+    EsPrimo(matriz, vector);
+    printf ("Los numeros primos son: ");
+    for (int i = 0; i < N*N; i++) {
+        if (vector[i] > 0) printf("%d ", vector[i]);
+    }
     return 0;
 }
 
 void Generar(int matriz[N][N]){
     srand(time(NULL));
-
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++) {
             matriz[i][j] = rand()%MAX+1;
@@ -27,23 +29,26 @@ void Generar(int matriz[N][N]){
     }
 }
 
-void EsPrimo (int matriz[N][N]){
-    for(int i = 0; i < N; i++){
-        for(int j = 0; j < N; j++){
-            int num = matriz[i][j];
-            int esPrimo=1;
-            if (num <= 1) {
-                esPrimo=0;
+int Primo (int num){
+    if (num <= 1) return 0;
+    for (int k = 2; k <= num/2; k++) {
+        if (num % k == 0) {
+            return 0;
+        }
+    }
+    return 1;
+}
 
-            }
-            for (int k=2; k <= num/2; k++) {
-                if (num % k == 0) {
-                    esPrimo=0;
+void EsPrimo (int matriz[N][N], int vector[N*N]){
+    int indice = 0;
+    for (int i = 0; i < N; i++){
+        for (int j = 0; j < N; j++){
+            if (Primo(matriz[i][j]) == 1){
+                if (indice < N*N) {
+                    vector[indice] = matriz[i][j];
+                    indice++;
                 }
             }
-            if(esPrimo) printf("El numero %d es primo\n", num);
-            else printf("El numero %d es NO primo\n", num);
         }
     }
 }
-//Todavia no guardalos numeros primos en un vector, pero si los imprimo.
