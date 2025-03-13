@@ -23,7 +23,7 @@ Datos crearEstructura() {
     scanf("%d",&resultado.valor1);
     printf("Ingrese valor tipo numero con 2 decimales:\n");
     scanf("%f",&resultado.valor2);
-    while (getchar() != '\n');
+    while (getchar() != '\n'); //refrescar el buffer(teclado)
     printf("Ingrese valor tipo caracter:\n");
     scanf("%s",resultado.valor3); //si coloco & le estoy dando un puntero a todo el array (%s epera un puntero a un solo caracter donde pueda empezar a guardar el string)(Solo me da una advertencia al ejecutar)
     return resultado;
