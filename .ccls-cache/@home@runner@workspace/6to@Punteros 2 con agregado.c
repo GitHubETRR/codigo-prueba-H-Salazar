@@ -7,7 +7,7 @@ typedef struct alum {
     char nombre[CANT];
     char apellido[CANT];
     int promedio;
-    struct alum *next;
+    struct alum *next; //puntero al siguiente nodo alumno
 } alum_t;
 
 void imprimir(alum_t *);
@@ -20,7 +20,7 @@ void liberar (alum_t *lista);
 
 
 int main() {
-    alum_t *_6TEL=NULL;
+    alum_t *_6TEL=NULL; //vacio lista y _6TEL guarda la direccion primer alumno de la lista
     int opcion, accion, res;
     /*Inicialmente se veia asi
     alum_t *alu_ptr=(alum_t *) malloc(sizeof(alum_t));
@@ -43,7 +43,9 @@ int main() {
         case 1:
             do {
                 printf("\nAgrege alumno:\n");
-                _6TEL = agregar_alumno(_6TEL);
+                _6TEL = agregar_alumno(_6TEL); //pasa la lista
+                //la f crea un nuevo alum y lo conecta al inicio de la lista
+                //devuelve el nuevo puntero al inicio de la lista
                 printf("Desea agregar otro alumno? (1: Si, 0: No): ");
                 scanf("%d", &opcion);
             } while (opcion == 1);
@@ -53,7 +55,7 @@ int main() {
             imprimir(_6TEL);
             break;
         case 3:
-            alum_t *promayor=mayor(_6TEL);
+            alum_t *promayor=mayor(_6TEL); //crea puntero tipo alum_t que apunta a eso
             printf("\nMayor promedio: %d", promayor->promedio);
             printf("\nNombre: %s \nApellido: %s\n", promayor->nombre, promayor->apellido);
             break;
@@ -102,14 +104,18 @@ void imprimir(alum_t *lista) {
 
 alum_t *agregar_alumno(alum_t *lista) {
     alum_t *alu_ptr=(alum_t *) malloc(sizeof(alum_t));
+    //alu_ptr va a guardar la dirección de memoria de un nodo alumno para poder llenarla de datos
+    //(alum_t *) es el tipo de variable que queremos
+    //agrega nuevo espacio para agregar un alum
     alu_ptr->next=lista;
+    //el next del nuevo alum se pone al inicio de la lista
     printf("Nombre: ");
     scanf("%s", alu_ptr->nombre);
     printf("Apellido: ");
     scanf("%s", alu_ptr->apellido);
     printf("Promedio: ");
     scanf("%d", &alu_ptr->promedio);
-    lista=alu_ptr;
+    lista=alu_ptr; //lista vuelve a ser el inicio
     printf("Alumno creado exitosamente\n");
     return lista;
 }
@@ -119,7 +125,7 @@ alum_t *mayor(alum_t *lista) {
     alum_t *max=lista;
     while(lista!=NULL) {
         if(lista->promedio>max->promedio) max=lista;
-        lista=lista->next;
+        lista=lista->next; //avanza al siguiente nodo
     }
     return max;
 }
@@ -135,13 +141,13 @@ alum_t *menor(alum_t *lista) {
 
 float promgen(alum_t *lista) {
     if(lista==NULL) return 0;
-    int suma=0, cantidad=0;
+    float suma=0, cantidad=0;
     while(lista!=NULL) {
         suma+=lista->promedio;
         cantidad++;
         lista=lista->next;
     }
-    return (float) suma/cantidad;
+    return suma/cantidad;
 }
 
 void liberar (alum_t *lista) {
@@ -154,6 +160,7 @@ void liberar (alum_t *lista) {
 }
 
 alum_t *buscar(alum_t *lista, char *nombre, char *apellido){
+    //char *nombre/apellido apunta a el inicio de la cadena
     while(lista!=NULL){
         if(strcasecmp(lista->nombre, nombre)==0 && strcasecmp(lista->apellido, apellido)==0) return lista; 
         //string compare ignorando mauysculas si son iguales los string de nombre y el nombre a buscar, devuelve el alumno
@@ -162,4 +169,3 @@ alum_t *buscar(alum_t *lista, char *nombre, char *apellido){
     }
     return NULL;
 }
-//uso de archivos proximamente??
