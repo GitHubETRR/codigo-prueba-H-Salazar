@@ -113,9 +113,13 @@ Antecedentes_t * agregar_ante(Antecedentes_t *inicio) {
     char buffer[1000];
     Antecedentes_t *ante_ptr=(Antecedentes_t *) malloc(sizeof(Antecedentes_t));
     printf("Agregar descripcion de crimen: ");
-    fgets(buffer, sizeof(buffer), stdin);
+    fgets(buffer, sizeof(buffer), stdin);//lee descripciones con espacios
+    //lee linea de texto completa desde lo que el usuario escribe y la guarda en buffer
     buffer[strcspn(buffer, "\n")] = '\0';// Eliminar el salto de línea final
-    ante_ptr->descripcion = strdup(buffer);// Asignar memoria dinámica para la descripción
+    //Busca el primer \n en el buffer y lo reemplaza por el fin de cadena
+    //strcspn devuelve la posicion del primer salto de linea
+    ante_ptr->descripcion = strdup(buffer);//Guardar copia propia en memoria dinamica
+    //Si no esta se pierde lo que modifique
     printf("Agregar year del crimen (%d-%d): ", minYear, yearActual);
     ante_ptr->year=comprobar_entero(minYear, yearActual);
     ante_ptr->next=inicio;
@@ -207,12 +211,9 @@ Criminal_t *cargar_desde_txt(const char *nombreArchivo) {
     char nombre[MAX], apellido[MAX];
     int nivelPeligro, cantAntecedentes;
     while(fscanf(f, "Nombre:%s Apellido:%s Nivel de Peligro:%d\n", nombre, apellido, &nivelPeligro) == 3) {
+        //si se leen los 3 datos entra en bucle
+        //carga de datos
         Criminal_t *nuevo = (Criminal_t *)malloc(sizeof(Criminal_t));
-        if(!nuevo) {
-            perror("Error de memoria");
-            fclose(f);
-            return lista;
-        }
         strcpy(nuevo->nombre, nombre);
         strcpy(nuevo->apellido, apellido);
         nuevo->nivelPeligro = nivelPeligro;
@@ -223,11 +224,12 @@ Criminal_t *cargar_desde_txt(const char *nombreArchivo) {
             break;
         }
         // Leer antecedentes
-        for(int i = 0; i < cantAntecedentes; i++) {
-            char descripcion[1024];  // Buffer temporal grande
+        for(int i=0; i<cantAntecedentes; i++) {
+            char descripcion[1000];  //buffer temporal grande
             int year;
-            if(fscanf(f, "Descripcion:%[^\n]\nYear:%d\n", descripcion, &year) != 2) {
-                // Liberar memoria si hay error
+            // Liberar memoria si hay error
+            if(fscanf(f, "Descripcion:%[^\n]\nYear:%d\n", descripcion, &year) != 2){
+                //%[^\n] para leer una línea completa con espacios
                 liberar_todo(nuevo);
                 fclose(f);
                 return lista;
@@ -239,7 +241,7 @@ Criminal_t *cargar_desde_txt(const char *nombreArchivo) {
                 fclose(f);
                 return lista;
             }
-            ante->descripcion=strdup(descripcion);
+            ante->descripcion=strdup(descripcion); //copia la descripcion con espacios
             if(!ante->descripcion) {
                 perror("Error de memoria");
                 free(ante);
@@ -247,13 +249,13 @@ Criminal_t *cargar_desde_txt(const char *nombreArchivo) {
                 fclose(f);
                 return lista;
             }
-            ante->year = year;
-            ante->next = nuevo->antecedentes;
-            nuevo->antecedentes = ante;
+            ante->year=year;
+            ante->next=nuevo->antecedentes;
+            nuevo->antecedentes=ante;
         }
         // Agregar a la lista (al inicio)
-        nuevo->next = lista;
-        lista = nuevo;
+        nuevo->next=lista;
+        lista=nuevo;
     }
 
     fclose(f);
