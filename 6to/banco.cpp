@@ -4,39 +4,73 @@
 #include <cctype>
 using namespace std;
 
-typedef enum { 
-    DEPOSITO=1, 
+typedef enum {
+    DEPOSITO=1,
     EXTRAER,
     TRANSFERIR,
     CERRAR
 }opciones_t;
 
-struct Cuenta{
+class Cuenta{
+private:
     int id;
-    string nombre;          //USAr CLASES??
+    string nombre;
     string pin;
     int saldo;
+
+public:
+    // constructor: inicializa los objetos de la clase
+    Cuenta() {
+        id=0;
+        nombre="";
+        pin="";
+        saldo=0;
+    }
+
+    //acceso para los datos
+    int getId() { return id; }
+    void setId(int nuevoId) { id=nuevoId; }
+    string getNombre() { return nombre; }
+    void setNombre(string nuevoNombre) { nombre=nuevoNombre; }
+    string getPin() { return pin; }
+    void setPin(string nuevoPin) { pin=nuevoPin; }
+
+    //manejo de saldo
+    int getSaldo() { return saldo; }
+    void setSaldo(int nuevoSaldo) { saldo=nuevoSaldo; }
+    void agregarSaldo(int monto) { saldo+=monto; }
+    bool retirarSaldo(int monto) { //bool porque luego lo uso en extraccion para cout es mensaje
+        if (monto<=saldo) {     //pero esa comparacion tambien la puedo hacer aqui directamente
+            saldo-=monto;
+            return true;
+        }
+        return false;
+    }
 };
 
-void menuPrincipal(vector<Cuenta>&cuentas); //& le paso la lista og no copy
-void menuUsuario(Cuenta&cuenta, vector<Cuenta>&cuentas);
-void crearCuenta(vector<Cuenta>&cuentas);
-string pedirPin(void);
-int logIn(vector<Cuenta>&cuentas);
-void deposito(Cuenta&cuenta);
-void extracion(Cuenta&cuenta);
-Cuenta* buscarCuenta(Cuenta&cuenta, vector<Cuenta>&cuentas);
-void transferir(Cuenta&cuenta, vector<Cuenta>&cuentas);
+class Banco{
+    private:
+        vector<Cuenta>cuentas; //crea un vector tipo cuenta llamado cuentas
+    public:
+        void menuPrincipal();
+        void menuUsuario(Cuenta&cuenta);
+        void crearCuenta();
+        string pedirPin(void);
+        int logIn();
+        void deposito(Cuenta&cuenta);
+        void extracion(Cuenta&cuenta);
+        Cuenta* buscarCuenta(int id);
+        void transferir(Cuenta&cuenta);
+}; 
 
 int main()
 {
-    vector<Cuenta>cuentas; //crea un vector tipo cuenta llamado cuentas
-    menuPrincipal(cuentas);
-
+    Banco banco; //creo un objeto de clase Banco
+    banco.menuPrincipal();
     return 0;
 }
 
-void menuPrincipal(vector<Cuenta>&cuentas){
+void Banco::menuPrincipal(){
     int opcion, user;
     do{
         cout<< "\n---Bienvenido---";
@@ -46,11 +80,12 @@ void menuPrincipal(vector<Cuenta>&cuentas){
 
         switch(opcion){
             case 1:
-                crearCuenta(cuentas);
+                crearCuenta();
                 break;
             case 2:
-                user=logIn(cuentas);
-                if (user!=-1) menuUsuario(cuentas[user], cuentas);
+                user=logIn();
+                if (user!=-1) menuUsuario(cuentas[user]); 
+                //se mete a cuentas, [user] se remplaza por la pos del vector
                 else cout<< "ID o PIN incorrecto\n";
                 break;
             case 3:
@@ -63,37 +98,38 @@ void menuPrincipal(vector<Cuenta>&cuentas){
     }while(opcion!=3);
 }
 
-void crearCuenta(vector<Cuenta>&cuentas){
+void Banco::crearCuenta(){
     Cuenta nueva; //variable llamada nueva de tipo Cuenta
+    string nombre;
     cout<<"Ingrese su nombre:\n-->";
-    cin>>nueva.nombre;
-    nueva.pin=pedirPin();
-    if (cuentas.empty()) nueva.id=1; 
+    cin>>nombre;
+    nueva.setNombre(nombre);
+    nueva.setPin(pedirPin()); 
+    if (cuentas.empty()) nueva.setId(1); //era antes nueva.id=1;
     //cuentas.empty() devuelve true si no hay cuentas
-    else nueva.id=cuentas.back().id + 1;
+    else nueva.setId(cuentas.back().getId() + 1);
     //cuentas.back() devuelve la ultima cuenta del vector
     //en este caso solo queria el .id
-    nueva.saldo=0;
+    nueva.setSaldo(0); 
     cuentas.push_back(nueva);
     //push_back inserta un nuevo elemento al final
     //es para agregar la cuenta al final del vector
     cout<< "Cuenta creada exitosamente!!\n";
-    cout<< "Su ID es: "<< nueva.id <<"\n";
+    cout<< "Su ID es: "<< nueva.getId() <<"\n";
 }
 
-string pedirPin(void){
+string Banco::pedirPin(void){
     string pin;
     while (1){
         cout<< "Ingrese un PIN de 4 digitos:\n";
         cin>> pin;
         if (pin.length()!=4){
             cout<< "Pin invalido. Debe tener 4 digitos\n";
-            continue;
+            continue;//para que vuelva a ingresar pin
         }
         int contNum=0;
-        for (int i=0; i<pin.length(); i++){
-            if (isdigit(pin[i])) contNum++;
-            //isdigit comprueba si es digito
+        for (size_t i=0; i<pin.length(); i++){
+            if (isdigit(pin[i])) contNum++; //isdigit comprueba si es digito
         }
         if (contNum==4) break;
         cout<< "Pin invalido. Debe tener 4 digitos\n";
@@ -102,15 +138,15 @@ string pedirPin(void){
     return pin;
 }
 
-int logIn(vector<Cuenta>&cuentas){
+int Banco::logIn(){
     int id;
     string pin;
     cout<< "Ingrese su ID\n-->";
     cin>>id;
     cout<< "Ingrese su PIN\n-->";
     pin=pedirPin();
-    for (int i=0; i<(int)cuentas.size(); i++){
-        if (cuentas[i].id ==id && cuentas[i].pin == pin){
+    for (size_t i=0; i<cuentas.size(); i++){
+        if (cuentas[i].getId() == id && cuentas[i].getPin() == pin){
             return i;
         }
     }
@@ -118,11 +154,11 @@ int logIn(vector<Cuenta>&cuentas){
 
 }
 
-void menuUsuario(Cuenta&cuenta, vector<Cuenta>&cuentas){
+void Banco::menuUsuario(Cuenta&cuenta){
     int op;
     do{
-        cout<< "\n---Bienvenido, "<< cuenta.nombre << "---";
-        cout<< "\nSaldo actual: $" << cuenta.saldo << "\n";
+        cout<< "\n---Bienvenido, "<< cuenta.getNombre() << "---"; 
+        cout<< "\nSaldo actual: $" << cuenta.getSaldo() << "\n"; 
         cout<< "\n1. Depositar\n2. Extraer";
         cout<<"\n3. Transferir a otra cuenta\n4. Cerrar sesion\n";
         cout<< "\nIngrese una opcion:\n-->";
@@ -136,7 +172,7 @@ void menuUsuario(Cuenta&cuenta, vector<Cuenta>&cuentas){
             extracion(cuenta);
                 break;
             case TRANSFERIR:
-            transferir(cuenta, cuentas);
+            transferir(cuenta);
                 break;
             case CERRAR:
             cout<< "\nLoging out...\n";
@@ -149,52 +185,49 @@ void menuUsuario(Cuenta&cuenta, vector<Cuenta>&cuentas){
     } while(op!=CERRAR);
 }
 
-void deposito(Cuenta&cuenta){
+void Banco::deposito(Cuenta&cuenta){
     int monto;
     cout<< "\nIngrese monto a depositar.\n-->";
     cin>> monto;
     if (monto>0){
-        cuenta.saldo+=monto;
+        cuenta.agregarSaldo(monto); //use metodo antes era cuenta.saldo+=monto
         cout<< "\nDeposito exitoso!!\n";
     }
     else cout<< "\nMonto invalido.\n";
 }
 
-void extracion(Cuenta&cuenta){
+void Banco::extracion(Cuenta&cuenta){
     int monto;
     cout<< "\nIngrese monto a retirar.\n-->";
     cin>> monto;
-    if (monto>0 && cuenta.saldo>=monto){
-        cuenta.saldo-=monto;
+    if (cuenta.retirarSaldo(monto)){
         cout<< "\nRetiro exitoso!!\n";
     }
     else cout<< "\nSaldo insuficiente o monto invalido.\n";
 }
 
-Cuenta* buscarCuenta(vector<Cuenta>&cuentas, int id){
-    for (int i=0; i<(int)cuentas.size(); i++){
-        if (cuentas[i].id ==id){
+Cuenta* Banco::buscarCuenta(int id){
+    for (size_t i=0; i<cuentas.size(); i++){
+        if (cuentas[i].getId() == id){ 
             return &cuentas[i];
         }
     }
-    return nullptr;
+    return nullptr;//si no encuentra el id
 }
 
-void transferir(Cuenta&cuenta, vector<Cuenta>&cuentas){
+void Banco::transferir(Cuenta&cuenta){
     int iddestino, monto;
     cout<< "Ingrese el ID de la cuenta destino:\n";
     cin>> iddestino;
-    Cuenta*destino=buscarCuenta(cuentas, iddestino);
-    if (destino!=nullptr && destino->id!=cuenta.id){
+    Cuenta*destino=buscarCuenta(iddestino);
+    if (destino!=nullptr && destino->getId()!=cuenta.getId()){ 
         cout<< "\nIngrese monto a depositar.\n-->";
         cin>> monto;
-        if(monto>0 && monto<=cuenta.saldo){
-            cuenta.saldo-=monto;
-            destino->saldo+=monto;
+        if(monto>0 && cuenta.retirarSaldo(monto)){ 
+            destino->agregarSaldo(monto); 
             cout<< "\nTransferencia exitosa!!\n";
         }
         else cout<< "\nSaldo insuficiente o monto invalido.\n";
     }
     else cout<< "\nCuenta de destino invalida\n";
 }
-

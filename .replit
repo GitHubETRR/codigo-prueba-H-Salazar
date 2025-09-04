@@ -69,3 +69,6 @@ start = "ccls"
 [deployment]
 run = ["sh", "-c", "./main"]
 build = ["sh", "-c", "make -s"]
+
+[agent]
+expertMode = true
