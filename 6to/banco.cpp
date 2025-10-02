@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <cctype>
+#include <fstream> //para los archivos
 using namespace std;
 
 typedef enum {
@@ -19,7 +20,7 @@ private:
     int saldo;
 
 public:
-    // constructor: inicializa los objetos de la clase
+    //constructor: inicializa los objetos de la clase
     Cuenta() {
         id=0;
         nombre="";
@@ -61,6 +62,8 @@ class Banco{
         void extracion(Cuenta&cuenta);
         Cuenta* buscarCuenta(int id);
         void transferir(Cuenta&cuenta);
+        void guardarCuentas();
+        void cargarCuentas();
 }; 
 
 int main()
@@ -71,6 +74,7 @@ int main()
 }
 
 void Banco::menuPrincipal(){
+    cargarCuentas();
     int opcion, user;
     do{
         cout<< "\n---Bienvenido---";
@@ -90,6 +94,7 @@ void Banco::menuPrincipal(){
                 break;
             case 3:
                 cout<< "\nSaliendo...\n";
+                guardarCuentas();
                 break;
             default:
                 cout<< "\nOpcion invalida. Intente nuevamente.\n";
@@ -223,11 +228,41 @@ void Banco::transferir(Cuenta&cuenta){
     if (destino!=nullptr && destino->getId()!=cuenta.getId()){ 
         cout<< "\nIngrese monto a depositar.\n-->";
         cin>> monto;
-        if(monto>0 && cuenta.retirarSaldo(monto)){ 
+        if (monto>0 && cuenta.retirarSaldo(monto)){ 
             destino->agregarSaldo(monto); 
             cout<< "\nTransferencia exitosa!!\n";
         }
         else cout<< "\nSaldo insuficiente o monto invalido.\n";
     }
     else cout<< "\nCuenta de destino invalida\n";
+}
+
+void Banco::guardarCuentas(){
+    ofstream archivo("cuentas.txt"); //ofstream archivo de salida
+    if (!archivo){
+        cout<< "Error\n";
+        return;
+    }
+    for (size_t i=0; i<cuentas.size(); i++){
+        archivo<< cuentas[i].getId()<< " "<< cuentas[i].getNombre()<< " "<< cuentas[i].getPin()<< " "<< cuentas[i].getSaldo()<< "\n";
+        //es como un cout. los " " es para agregar un espacio entre datos
+    }
+    archivo.close();
+}
+
+void Banco::cargarCuentas(){
+    ifstream archivo("cuentas.txt");
+    cuentas.clear();
+    int id, saldo;
+    string nombre, pin;
+    while (archivo>> id>> nombre>> pin>> saldo){
+        //es como tener un cin pero lee el archivo
+        Cuenta nueva;
+        nueva.setId(id);
+        nueva.setNombre(nombre);
+        nueva.setPin(pin);
+        nueva.setSaldo(saldo);
+        cuentas.push_back(nueva);
+    }
+    archivo.close();
 }
